@@ -1,10 +1,11 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="overlay-behavior.html">
 
 <script>
 (function() {
   'use strict';
 
-  window.AnimatedOverlayBehavior = {
+  const AnimatedOverlayBehaviorImpl = {
     
     properties: {
 
@@ -70,6 +71,8 @@
     }
 
   };
+
+  window.AnimatedOverlayBehavior = [AnimatedOverlayBehaviorImpl, OverlayBehavior];
 
 })();
 </script>
