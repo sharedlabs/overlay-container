@@ -44,30 +44,35 @@
     },
 
     listeners: {
-      'overlay-opened': '_overlayOpened',
-      'overlay-closed': '_overlayClosed'
+      'overlay-opened': '__animateIn',
+      'overlay-closed': '__animateOut'
     },
 
-    _overlayOpened() {
-      const config = this.openAnimationConfig;
+    __animateIn() {
+      requestAnimationFrame(_ => {
+        const config = this.openAnimationConfig;
 
-      this._animation = this.animate(config.keyframes, config.options);
-      this._animation.onfinish = _ => {
-        this.fire('overlay-open-animation-finish');
-        this._animation = null;
-      };
+        this._animation = this.animate(config.keyframes, config.options);
+        this._animation.onfinish = _ => {
+          this.fire('overlay-open-animation-finish');
+          this._animation = null;
+        };
+      });
     },
 
-    _overlayClosed() {
-      const config = this.closeAnimationConfig;
-
+    __animateOut() {
       this.style.display = '';
-      this._animation = this.animate(config.keyframes, config.options);
-      this._animation.onfinish = _ => {
-        this.fire('overlay-close-animation-finish');
-        this._animation = null;
-        this.remove();
-      };
+
+      requestAnimationFrame(_ => {
+        const config = this.closeAnimationConfig;
+
+        this._animation = this.animate(config.keyframes, config.options);
+        this._animation.onfinish = _ => {
+          this.fire('overlay-close-animation-finish');
+          this._animation = null;
+          this.remove();
+        };
+      });
     }
 
   };
