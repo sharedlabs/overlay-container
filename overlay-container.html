@@ -46,7 +46,7 @@
 
     _onOverlayCreated(event) {
       const overlay = event.detail.overlay;
-      overlay.parentContainer = this.$.overlays;
+      overlay.hostTarget = this.$.overlays;
     },
 
     _onOverlayDetached(event) {
