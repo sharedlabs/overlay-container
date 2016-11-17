@@ -1,0 +1,76 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<dom-module id="overlay-container">
+  <template>
+    <div id="overlays"></div>
+  </template>
+</dom-module>
+
+<script>
+(function() {
+  'use strict';
+
+  Polymer({
+
+    is: 'overlay-container',
+
+    properties: {
+    },
+
+    get overlays() {
+      return Array.from(this.$.overlays.children);
+    },
+
+    get currentOverlay() {
+      const overlays = this.overlays;
+      let currentOverlay;
+
+      for (let i = overlays.length - 1; i >= 0; i--) {
+        if (overlays[i].opened) {
+          currentOverlay = overlays[i];
+          break;
+        }
+      }
+
+      return currentOverlay;
+    },
+
+    ready() {
+      Polymer.RenderStatus.afterNextRender(this, function() {
+        this.listen(document.body, 'overlay-created', '_onOverlayCreated');
+        this.listen(document.body, 'overlay-opened', '_onOverlayOpened');
+        this.listen(this, 'overlay-detached', '_onOverlayDetached');        
+        this.listen(window, 'popstate', '_onPopstate');
+      });
+    },
+
+    _onOverlayCreated(event) {
+      const overlay = event.detail.overlay;
+      overlay.parentContainer = this.$.overlays;
+    },
+
+    _onOverlayDetached(event) {
+      const currentOverlay = this.currentOverlay;
+
+      // Focus next opened overlay
+      if (this.currentOverlay) {
+        this.currentOverlay.focus();
+      }
+    },
+
+    _onOverlayOpened() {
+      history.pushState({}, '', location.href);
+    },
+
+    _onPopstate() {
+      const currentOverlay = this.currentOverlay;
+
+      if (currentOverlay) {
+        currentOverlay.opened = false;
+      }
+    }
+
+  });
+
+}());
+</script>
