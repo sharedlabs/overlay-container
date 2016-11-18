@@ -31,8 +31,14 @@
 
       onDetach: {
         type: Function
-      }
+      },
   
+      canceled: {
+        type: Boolean,
+        readOnly: true,
+        value: false
+      }
+
     },
 
     created() {
@@ -83,6 +89,7 @@
           Polymer.dom(this.hostTarget).appendChild(this);
         }
 
+        this._setCanceled(false);
         this.style.display = '';
         this.focus();
 
@@ -100,6 +107,7 @@
       const escKey = 27;
 
       if (!this.noCancelOnEscKey && event.keyCode === escKey) {
+        this._setCanceled(true);
         this.opened = false;
       }
     }
