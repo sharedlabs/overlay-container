@@ -38,8 +38,8 @@
     ready() {
       Polymer.RenderStatus.afterNextRender(this, function() {
         this.listen(document.body, 'overlay-created', '_onOverlayCreated');
-        this.listen(document.body, 'overlay-opened', '_onOverlayOpened');
-        this.listen(this, 'overlay-detached', '_onOverlayDetached');        
+        this.listen(this, 'overlay-opened', '_onOverlayOpened');
+        this.listen(this, 'overlay-closed', '_onOverlayClosed');
         this.listen(window, 'popstate', '_onPopstate');
       });
     },
@@ -49,7 +49,7 @@
       overlay.hostTarget = this.$.overlays;
     },
 
-    _onOverlayDetached(event) {
+    _onOverlayClosed(event) {
       const currentOverlay = this.currentOverlay;
 
       // Focus next opened overlay
