@@ -54,6 +54,7 @@
 
         this._animation = this.animate(config.keyframes, config.options);
         this._animation.onfinish = _ => {
+          this.focus();
           this.fire('overlay-open-animation-finish');
           this._animation = null;
         };
