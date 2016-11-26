@@ -19,10 +19,7 @@
         observer: '__openedChanged'
       },
 
-      hostTarget: {
-        type: Object,
-        value: document.body
-      },
+      hostTarget: Object,
 
       noCancelOnEscKey: {
         type: Boolean,
@@ -39,6 +36,10 @@
         value: false
       }
 
+    },
+
+    get __hostTarget() {
+      return this.hostTarget || document.body; 
     },
 
     created() {
@@ -60,7 +61,7 @@
       this.fire('overlay-detached', {
         overlay: this
       }, {
-        node: this.isAttached ? this : this.hostTarget
+        node: this.isAttached ? this : this.__hostTarget
       });
 
       if (typeof this.onDetach === 'function') {
@@ -85,8 +86,10 @@
     __openedChanged(opened, old) {
       if (opened) {
         // Attach or reattach this element if needed
-        if (!this.isAttached || this.parentElement !== this.hostTarget) {
-          Polymer.dom(this.hostTarget).appendChild(this);
+        if (!this.isAttached || this.hostTarget) {
+          if (this.parentElement !== this.__hostTarget) {
+            Polymer.dom(this.__hostTarget).appendChild(this);
+          }
         }
 
         this._setCanceled(false);
