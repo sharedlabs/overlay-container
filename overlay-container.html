@@ -59,7 +59,7 @@
     },
 
     _onOverlayOpened(event) {
-      if (!event.detail.overlay.noCloseOnPopState) {
+      if (!event.detail.overlay.noCancelOnPopState) {
         history.pushState({}, '', location.href);
       }
     },
@@ -67,7 +67,8 @@
     _onPopstate() {
       const currentOverlay = this.currentOverlay;
 
-      if (currentOverlay && !currentOverlay.noCloseOnPopState) {
+      if (currentOverlay && !currentOverlay.noCancelOnPopState) {
+        currentOverlay._setCanceled(true);
         currentOverlay.opened = false;
       }
     }
