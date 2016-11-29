@@ -25,6 +25,11 @@
         type: Boolean,
         value: false
       },
+      
+      noCloseOnPopState: {
+        type: Boolean,
+        value: false
+      },
 
       onDetach: {
         type: Function
@@ -96,7 +101,7 @@
         this.style.display = '';
         this.focus();
 
-        this.fire('overlay-opened');
+        this.fire('overlay-opened', {overlay: this});
       } else if (old) {
         this.style.display = 'none';
 
