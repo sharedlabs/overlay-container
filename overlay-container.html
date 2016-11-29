@@ -58,14 +58,16 @@
       }
     },
 
-    _onOverlayOpened() {
-      history.pushState({}, '', location.href);
+    _onOverlayOpened(event) {
+      if (!event.detail.overlay.noCloseOnPopState) {
+        history.pushState({}, '', location.href);
+      }
     },
 
     _onPopstate() {
       const currentOverlay = this.currentOverlay;
 
-      if (currentOverlay) {
+      if (currentOverlay && !currentOverlay.noCloseOnPopState) {
         currentOverlay.opened = false;
       }
     }
