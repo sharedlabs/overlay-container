@@ -36,12 +36,10 @@
     },
 
     ready() {
-      Polymer.RenderStatus.afterNextRender(this, function() {
-        this.listen(document.body, 'overlay-created', '_onOverlayCreated');
-        this.listen(this, 'overlay-opened', '_onOverlayOpened');
-        this.listen(this, 'overlay-closed', '_onOverlayClosed');
-        this.listen(window, 'popstate', '_onPopstate');
-      });
+      this.listen(document.body, 'overlay-created', '_onOverlayCreated');
+      this.listen(this, 'overlay-opened', '_onOverlayOpened');
+      this.listen(this, 'overlay-closed', '_onOverlayClosed');
+      this.listen(window, 'popstate', '_onPopstate');
     },
 
     _onOverlayCreated(event) {
