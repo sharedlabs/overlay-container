@@ -49,34 +49,45 @@
     },
 
     __animateIn() {
-      this.style.willChange = 'transform';
-
+      this.__beforeAnimate();
+      
       requestAnimationFrame(_ => {
         const config = this.openAnimationConfig;
 
         this._animation = this.animate(config.keyframes, config.options);
         this._animation.onfinish = _ => {
+          this.__afterAnimate();
           this.focus();
           this.fire('overlay-open-animation-finish');
-          this._animation = null;
         };
       });
     },
 
     __animateOut() {
       this.style.display = '';
+      this.__beforeAnimate();
 
       requestAnimationFrame(_ => {
         const config = this.closeAnimationConfig;
 
         this._animation = this.animate(config.keyframes, config.options);
         this._animation.onfinish = _ => {
-          this.fire('overlay-close-animation-finish');
-          this.style.willChange = '';
-          this._animation = null;
+          this.__afterAnimate();
           this.remove();
+          this.fire('overlay-close-animation-finish');
         };
       });
+    },
+
+    __beforeAnimate() {
+      document.body.style.overflow = 'hidden';
+      this.style.willChange = 'transform';
+    },
+
+    __afterAnimate() {
+      document.body.style.overflow = '';
+      this.style.willChange = '';
+      this._animation = null;
     }
 
   };
