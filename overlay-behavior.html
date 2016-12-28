@@ -133,13 +133,17 @@
       }
 
       const path = Polymer.dom(event).path;
-
+      let permitted;
       for (let i = 0; i < path.length; i++) {
         if (path[i] === this) {
-          this.opened = false;
+          permitted = true;
           break;
         }
-      }      
+      }
+
+      if (!permitted) {
+        this.opened = false;
+      }     
     }
 
   };
