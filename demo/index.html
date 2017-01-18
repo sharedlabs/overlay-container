@@ -7,22 +7,34 @@
     <title>overlay-container demo</title>
 
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-
-    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
-    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
     <link rel="import" href="../overlay-container.html">
+    <link rel="import" href="sample-overlay.html">
+    <link rel="import" href="sample-animated-overlay.html">
 
-    <style is="custom-style" include="demo-pages-shared-styles">
+    <style>
     </style>
   </head>
   <body>
-    <div class="vertical-section-container centered">
-      <h3>Basic overlay-container demo</h3>
-      <demo-snippet>
-        <template>
-          <overlay-container></overlay-container>
-        </template>
-      </demo-snippet>
-    </div>
+
+    <overlay-container></overlay-container>
+    <button onclick="openOverlay()">Open overlay</button>
+    <button onclick="openAnimatedOverlay()">Open animated overlay</button>
+
+    <script>
+
+      function openOverlay() {
+        window.overlay = document.createElement('sample-overlay');
+        overlay.style.left = Math.floor(Math.random() * 500) + 'px';
+        overlay.style.top = Math.floor(Math.random() * 200) + 'px';
+        overlay.open();
+      }
+
+      function openAnimatedOverlay() {
+        window.overlay = document.createElement('sample-animated-overlay');
+        overlay.open();
+      }
+
+    </script>
+
   </body>
 </html>

@@ -1,0 +1,36 @@
+
+<link rel="import" href="../../polymer/polymer-element.html">
+<link rel="import" href="../overlay-mixin.html">
+
+<dom-module id="sample-overlay">
+  <template>
+    <style>
+      :host {
+        background: #ddd;
+        display: block;
+        height: 200px;
+        position: absolute;
+        width: 200px;
+      }
+
+      :host(:focus) {
+        border: 2px solid dodgerblue;
+      }
+    </style>
+
+    Hello!!!
+
+  </template>
+
+  <script>
+
+    class SampleOverlay extends OverlayMixin(Polymer.Element) {
+
+      static get is() {return 'sample-overlay';}
+
+    }
+
+    customElements.define(SampleOverlay.is, SampleOverlay);
+
+  </script>
+</dom-module>
