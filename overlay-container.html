@@ -60,8 +60,22 @@
       }
 
       _onOverlayOpened(event) {
-        if (!event.detail.overlay.noCancelOnPopState) {
+        const overlay = event.detail.overlay;
+
+        if (!overlay.noCancelOnPopState) {
           history.pushState({}, '', location.href);
+        }
+
+        if (overlay.unique) {
+          const overlays = this.overlays;
+
+          for (let i = overlays.length - 1; i >= 0; i--) {
+            if (overlays[i] !== overlay && overlays[i].localName === overlay.localName
+                && overlays[i].opened) {
+              overlays[i].opened = false;
+              break;
+            }
+          }
         }
       }
 
