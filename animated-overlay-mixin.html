@@ -46,11 +46,14 @@
       };
     }
 
-    constructor() {
-      super();
+    __openedChanged(opened, old) {
+      super.__openedChanged(opened, old);
 
-      this.addEventListener('overlay-opened', this.__animateIn.bind(this));
-      this.addEventListener('overlay-closed', this.__animateOut.bind(this));
+      if (opened) {
+        this.__animateIn();
+      } else if (old) {
+        this.__animateOut();
+      }
     }
 
     __animateIn() {
