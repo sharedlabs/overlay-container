@@ -40,6 +40,11 @@
             }
           };
         }
+      },
+
+      removeOnClose: {
+        type: Boolean,
+        value: true
       }
   
     },
@@ -74,7 +79,9 @@
         this._animation = this.animate(config.keyframes, config.options);
         this._animation.onfinish = _ => {
           this.__afterAnimate();
-          this.remove();
+          if (this.removeOnClose) {
+            this.remove();
+          }
           this.fire('overlay-close-animation-finish');
         };
       });
