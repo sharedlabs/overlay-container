@@ -15,11 +15,12 @@
           return {
             keyframes: [
               {opacity: 0, transform: 'translateY(100px)'}, 
-              {opacity: 1, transform: 'translateY(0)'}               
+              {opacity: 1, transform: 'translateY(0)'}              
             ],
             options: {
               duration: 225,
-              easing: 'cubic-bezier(0.165, 0.84, 0.44, 1)'
+              easing: 'cubic-bezier(0.165, 0.84, 0.44, 1)',
+              fill: 'forwards'
             }
           };
         } 
