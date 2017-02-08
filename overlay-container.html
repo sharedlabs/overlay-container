@@ -1,82 +1,96 @@
-<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../polymer/polymer-element.html">
 
 <dom-module id="overlay-container">
   <template>
     <style>
       #overlays {
         pointer-events: all;
-      }    
-    </style>    
+      }
+    </style>
+
     <div id="overlays"></div>
+
   </template>
-</dom-module>
 
-<script>
-(function() {
-  'use strict';
+  <script>
 
-  Polymer({
+    class OverlayContainer extends Polymer.Element {
 
-    is: 'overlay-container',
+      static get is() {return 'overlay-container';}
 
-    properties: {
-    },
+      get overlays() {
+        return this.$.overlays.children;
+      }
 
-    get overlays() {
-      return Array.from(this.$.overlays.children);
-    },
+      get currentOverlay() {
+        const overlays = this.overlays;
+        let currentOverlay;
 
-    get currentOverlay() {
-      const overlays = this.overlays;
-      let currentOverlay;
+        for (let i = overlays.length - 1; i >= 0; i--) {
+          if (overlays[i].opened) {
+            currentOverlay = overlays[i];
+            break;
+          }
+        }
 
-      for (let i = overlays.length - 1; i >= 0; i--) {
-        if (overlays[i].opened) {
-          currentOverlay = overlays[i];
-          break;
+        return currentOverlay;
+      }
+
+      ready() {
+        super.ready();
+        document.body.addEventListener('overlay-created', this._onOverlayCreated.bind(this));
+        this.addEventListener('overlay-opened', this._onOverlayOpened.bind(this));
+        this.addEventListener('overlay-closed', this._onOverlayClosed.bind(this));
+        window.addEventListener('popstate', this._onPopstate.bind(this));
+      }
+
+      _onOverlayCreated(event) {
+        const overlay = event.detail.overlay;
+        overlay.hostTarget = this.$.overlays;
+      }
+
+      _onOverlayClosed(event) {
+        const currentOverlay = this.currentOverlay;
+
+        // Focus next opened overlay
+        if (this.currentOverlay) {
+          this.currentOverlay.focus();
         }
       }
 
-      return currentOverlay;
-    },
+      _onOverlayOpened(event) {
+        const overlay = event.detail.overlay;
 
-    ready() {
-      this.listen(document.body, 'overlay-created', '_onOverlayCreated');
-      this.listen(this, 'overlay-opened', '_onOverlayOpened');
-      this.listen(this, 'overlay-closed', '_onOverlayClosed');
-      this.listen(window, 'popstate', '_onPopstate');
-    },
+        if (!overlay.noCancelOnPopState) {
+          history.pushState({}, '', location.href);
+        }
 
-    _onOverlayCreated(event) {
-      const overlay = event.detail.overlay;
-      overlay.hostTarget = this.$.overlays;
-    },
+        if (overlay.unique) {
+          const overlays = this.overlays;
 
-    _onOverlayClosed(event) {
-      const currentOverlay = this.currentOverlay;
-
-      // Focus next opened overlay
-      if (this.currentOverlay) {
-        this.currentOverlay.focus();
+          for (let i = overlays.length - 1; i >= 0; i--) {
+            if (overlays[i] !== overlay && overlays[i].localName === overlay.localName
+                && overlays[i].opened) {
+              overlays[i].opened = false;
+              break;
+            }
+          }
+        }
       }
-    },
 
-    _onOverlayOpened(event) {
-      if (!event.detail.overlay.noCancelOnPopState) {
-        history.pushState({}, '', location.href);
+      _onPopstate() {
+        const currentOverlay = this.currentOverlay;
+
+        if (currentOverlay && !currentOverlay.noCancelOnPopState) {
+          currentOverlay._setCanceled(true);
+          currentOverlay.opened = false;
+        }
       }
-    },
 
-    _onPopstate() {
-      const currentOverlay = this.currentOverlay;
-
-      if (currentOverlay && !currentOverlay.noCancelOnPopState) {
-        currentOverlay._setCanceled(true);
-        currentOverlay.opened = false;
-      }
     }
 
-  });
+    customElements.define(OverlayContainer.is, OverlayContainer);
 
-}());
-</script>
+  </script>
+</dom-module>
