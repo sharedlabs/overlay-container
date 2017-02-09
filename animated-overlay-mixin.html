@@ -67,7 +67,7 @@
           this.__afterAnimate();
           this.focus();
 
-          this.dispatchEvent(new CustomEvent('finish-open-overlay-open-animation', {
+          this.dispatchEvent(new CustomEvent('overlay-open-animation-finish', {
             bubbles: true,
             composed: true
           }));
@@ -87,7 +87,7 @@
           this.__afterAnimate();
           this.remove();
 
-          this.dispatchEvent(new CustomEvent('finish-close-overlay-animation', {
+          this.dispatchEvent(new CustomEvent('overlay-close-animation-finish', {
             bubbles: true,
             composed: true
           }));
