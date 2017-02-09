@@ -167,7 +167,7 @@
         return;
       }
 
-      const path = event.path;
+      const path = event.composedPath();
 
       let permitted;
       for (let i = 0; i < path.length; i++) {
