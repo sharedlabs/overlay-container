@@ -1,6 +1,6 @@
 # overlay-container
 
-Overlays rendered anywhere on the DOM can couse stacking order problems (overlays trapped within a z-index).
+Overlays rendered anywhere on the DOM can cause stacking order problems (overlays trapped within a z-index).
 
 The `overlay-container` element ensures that overlays will always be rendered on the top layer.
 
@@ -19,7 +19,7 @@ class MyOverlay extends OverlayMixin(Polymer.Element) {
 
 To create your overlay you can:
 
-### Place your overlay now anywehere you want
+### Place your overlay now anywhere you want
 
 This way your overlay will be teleported to the `overlay-container` before is opened for the first time.
 
