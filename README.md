@@ -27,7 +27,7 @@ This way your overlay will be teleported to the `overlay-container` before is op
 
 #### Or use Javascript
 
-I personally prefer this way if I don't need databinding. This way you make sure your overlay will be attached just once. You don't need to append your overlay manually, calling open() will place the overlay on the `overlay-container`
+I personally prefer this way if I don't need databinding. Doing like this the overlay will be attached just once. Calling open() will place the overlay within the `overlay-container` (no need to appendChild).
 
 ```js
 const myOverlay = document.createElement('my-overlay');
