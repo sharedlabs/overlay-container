@@ -17,9 +17,7 @@ class MyOverlay extends OverlayMixin(Polymer.Element) {
 }
 ```
 
-To create your overlay you can:
-
-### Place your overlay now anywhere you want
+#### Place your overlay anywhere you want
 
 This way your overlay will be teleported to the `overlay-container` before is opened for the first time.
 
@@ -27,7 +25,7 @@ This way your overlay will be teleported to the `overlay-container` before is op
 <my-overlay></my-overlay>
 ```
 
-### Or use create it with javascript
+#### Or use create it with javascript
 
 I personally prefer this way if I don't need databinding. This way you make sure your overlay will be attached just once. You don't need to append your overlay manually, calling open() will place the overlay on the `overlay-container`
 
