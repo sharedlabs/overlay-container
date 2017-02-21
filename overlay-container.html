@@ -5,8 +5,8 @@
     <style>
       #overlays {
         pointer-events: all;
-      }    
-    </style>    
+      }
+    </style>
     <div id="overlays"></div>
   </template>
 </dom-module>
@@ -23,14 +23,14 @@
     },
 
     get overlays() {
-      return Array.from(this.$.overlays.children);
+      return [].slice.call(this.$.overlays.children);
     },
 
     get currentOverlay() {
-      const overlays = this.overlays;
-      let currentOverlay;
+      var overlays = this.overlays;
+      var currentOverlay;
 
-      for (let i = overlays.length - 1; i >= 0; i--) {
+      for (var i = overlays.length - 1; i >= 0; i--) {
         if (overlays[i].opened) {
           currentOverlay = overlays[i];
           break;
@@ -40,20 +40,20 @@
       return currentOverlay;
     },
 
-    ready() {
+    ready: function() {
       this.listen(document.body, 'overlay-created', '_onOverlayCreated');
       this.listen(this, 'overlay-opened', '_onOverlayOpened');
       this.listen(this, 'overlay-closed', '_onOverlayClosed');
       this.listen(window, 'popstate', '_onPopstate');
     },
 
-    _onOverlayCreated(event) {
-      const overlay = event.detail.overlay;
+    _onOverlayCreated: function(event) {
+      var overlay = event.detail.overlay;
       overlay.hostTarget = this.$.overlays;
     },
 
-    _onOverlayClosed(event) {
-      const currentOverlay = this.currentOverlay;
+    _onOverlayClosed: function(event) {
+      var currentOverlay = this.currentOverlay;
 
       // Focus next opened overlay
       if (this.currentOverlay) {
@@ -61,14 +61,14 @@
       }
     },
 
-    _onOverlayOpened(event) {
+    _onOverlayOpened: function(event) {
       if (!event.detail.overlay.noCancelOnPopState) {
         history.pushState({}, '', location.href);
       }
     },
 
-    _onPopstate() {
-      const currentOverlay = this.currentOverlay;
+    _onPopstate: function() {
+      var currentOverlay = this.currentOverlay;
 
       if (currentOverlay && !currentOverlay.noCancelOnPopState) {
         currentOverlay._setCanceled(true);
