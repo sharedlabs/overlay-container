@@ -44,6 +44,11 @@
         type: Boolean,
         readOnly: true,
         value: false
+      },
+
+      noAutoFocus: {
+        type: Boolean,
+        value: false
       }
 
     },
@@ -106,7 +111,9 @@
 
         this._setCanceled(false);
         this.style.display = '';
-        this.focus();
+        if (!this.noAutoFocus) {
+          this.focus();
+        }
 
         this.fire('overlay-opened', {overlay: this});
       } else if (old) {
