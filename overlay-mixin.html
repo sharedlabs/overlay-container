@@ -2,55 +2,51 @@
 
   window.OverlayMixin = subclass => class extends subclass {
 
-    static get config() {
+    static get properties() {
       return {
 
-        properties: {
+        opened: {
+          type: Boolean,
+          value: false,
+          notify: true,
+          observer: '__openedChanged'
+        },
 
-          opened: {
-            type: Boolean,
-            value: false,
-            notify: true,
-            observer: '__openedChanged'
-          },
+        hostTarget: Object,
 
-          hostTarget: Object,
+        noCancelOnEscKey: {
+          type: Boolean,
+          value: false
+        },
+        
+        noCancelOnPopState: {
+          type: Boolean,
+          value: false
+        },
 
-          noCancelOnEscKey: {
-            type: Boolean,
-            value: false
-          },
-          
-          noCancelOnPopState: {
-            type: Boolean,
-            value: false
-          },
+        cancelOnOutsideClick: {
+          type: Boolean,
+          value: false  
+        },
 
-          cancelOnOutsideClick: {
-            type: Boolean,
-            value: false  
-          },
+        unique: {
+          type: Boolean,
+          value: false
+        },
 
-          unique: {
-            type: Boolean,
-            value: false
-          },
+        onDetach: {
+          type: Function
+        },
+    
+        canceled: {
+          type: Boolean,
+          readOnly: true,
+          value: false
+        },
 
-          onDetach: {
-            type: Function
-          },
-      
-          canceled: {
-            type: Boolean,
-            readOnly: true,
-            value: false
-          },
-
-          noAutoFocus: {
-            type: Boolean,
-            value: false
-          }
-
+        noAutoFocus: {
+          type: Boolean,
+          value: false
         }
 
       };
