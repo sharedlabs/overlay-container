@@ -18,7 +18,7 @@
           type: Boolean,
           value: false
         },
-        
+
         noCancelOnPopState: {
           type: Boolean,
           value: false
@@ -26,7 +26,12 @@
 
         cancelOnOutsideClick: {
           type: Boolean,
-          value: false  
+          value: false
+        },
+
+        removeOnClose: {
+          type: Boolean,
+          value: false
         },
 
         unique: {
@@ -37,7 +42,7 @@
         onDetach: {
           type: Function
         },
-    
+
         canceled: {
           type: Boolean,
           readOnly: true,
@@ -100,7 +105,7 @@
 
     open() {
       this.opened = true;
-      
+
       if (!this.isConnected) {
         this.__openedChanged(true, this.opened);
       }
@@ -155,6 +160,10 @@
       } else {
         this.style.display = 'none';
       }
+
+      if (!opened && this.removeOnClose) {
+        this.remove();
+      }
     }
 
     __onKeydown(event) {
@@ -183,7 +192,7 @@
 
       if (!permitted) {
         this.opened = false;
-      }     
+      }
     }
   };
 
