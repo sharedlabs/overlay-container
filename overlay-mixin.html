@@ -9,7 +9,7 @@
           type: Boolean,
           value: false,
           notify: true,
-          observer: '__openedChanged'
+          observer: '_openedChanged'
         },
 
         hostTarget: Object,
@@ -107,7 +107,7 @@
       this.opened = true;
 
       if (!this.isConnected) {
-        this.__openedChanged(true, this.opened);
+        this._openedChanged(true, this.opened);
       }
     }
 
@@ -124,7 +124,7 @@
      * @param {!Boolean} opened
      * @param {Boolean} old
      */
-    __openedChanged(opened, old) {
+    _openedChanged(opened, old) {
       if (opened) {
         // Attach or reattach this element if needed
         if (!this.isConnected || this.hostTarget) {
