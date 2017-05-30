@@ -46,7 +46,6 @@
 
     _openedChanged(opened, old) {
       super._openedChanged(opened, old);
-
       if (opened) {
         this.__animateIn();
       } else if (old) {
@@ -56,15 +55,12 @@
 
     __animateIn() {
       this.__beforeAnimate();
-      
       requestAnimationFrame(_ => {
         const config = this.openAnimationConfig;
-
         this.__animation = this.animate(config.keyframes, config.options);
         this.__animation.onfinish = _ => {
           this.__afterAnimate();
           this.focus();
-
           this.dispatchEvent(new CustomEvent('overlay-open-animation-finish', {
             bubbles: true,
             composed: true
@@ -76,10 +72,8 @@
     __animateOut() {
       this.style.display = '';
       this.__beforeAnimate();
-
       requestAnimationFrame(_ => {
         const config = this.closeAnimationConfig;
-
         this.__animation = this.animate(config.keyframes, config.options);
         this.__animation.onfinish = _ => {
           this.__afterAnimate();

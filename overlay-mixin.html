@@ -63,10 +63,8 @@
 
     constructor() {
       super();
-
-      this.__onKeydown = this.__onKeydown.bind(this);
+      this.__onOverlayKeydown = this.__onOverlayKeydown.bind(this);
       this.__onDocumentMousedown = this.__onDocumentMousedown.bind(this);
-
       document.body.dispatchEvent(new CustomEvent('overlay-created', {
         detail: {
           overlay: this
@@ -80,9 +78,8 @@
       super.connectedCallback();
       this._ensureAttribute('tabindex', -1);
       this.style.outline = 0;
-
       requestAnimationFrame(_ => {
-        this.__toggleListeners(true);
+        this.__toggleOverlayListeners(true);
       });
     }
 
@@ -94,27 +91,23 @@
         bubbles: true,
         composed: true
       }));
-
       if (typeof this.onDetach === 'function') {
         this.onDetach();
       }
-
-      this.__toggleListeners(false);
+      this.__toggleOverlayListeners(false);
       super.disconnectedCallback();
     }
 
     open() {
       this.opened = true;
-
       if (!this.isConnected) {
         this._openedChanged(true, this.opened);
       }
     }
 
-    __toggleListeners(enable) {
+    __toggleOverlayListeners(enable) {
       const m = enable ? 'addEventListener' : 'removeEventListener';
-
-      this[m]('keydown', this.__onKeydown);
+      this[m]('keydown', this.__onOverlayKeydown);
       document[m]('mousedown', this.__onDocumentMousedown);
     }
 
@@ -132,14 +125,11 @@
             this._hostTarget.appendChild(this);
           }
         }
-
         this._setCanceled(false);
         this.style.display = '';
-
         if (!this.noAutoFocus) {
           this.focus();
         }
-
         this.dispatchEvent(new CustomEvent('overlay-opened', {
           detail: {
             overlay: this
@@ -149,7 +139,6 @@
         }));
       } else if (old) {
         this.style.display = 'none';
-
         this.dispatchEvent(new CustomEvent('overlay-closed', {
           detail: {
             overlay: this
@@ -160,15 +149,13 @@
       } else {
         this.style.display = 'none';
       }
-
       if (!opened && this.removeOnClose) {
         this.remove();
       }
     }
 
-    __onKeydown(event) {
+    __onOverlayKeydown(event) {
       const escKey = 27;
-
       if (!this.noCancelOnEscKey && event.keyCode === escKey) {
         this._setCanceled(true);
         this.opened = false;
@@ -179,9 +166,7 @@
       if (!this.cancelOnOutsideClick) {
         return;
       }
-
       const path = event.composedPath();
-
       let permitted;
       for (let i = 0; i < path.length; i++) {
         if (path[i] === this) {
@@ -189,7 +174,6 @@
           break;
         }
       }
-
       if (!permitted) {
         this.opened = false;
       }

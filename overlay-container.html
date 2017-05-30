@@ -26,49 +26,43 @@
       get currentOverlay() {
         const overlays = this.overlays;
         let currentOverlay;
-
         for (let i = overlays.length - 1; i >= 0; i--) {
           if (overlays[i].opened) {
             currentOverlay = overlays[i];
             break;
           }
         }
-
         return currentOverlay;
       }
 
       ready() {
         super.ready();
-        document.body.addEventListener('overlay-created', this._onOverlayCreated.bind(this));
-        this.addEventListener('overlay-opened', this._onOverlayOpened.bind(this));
-        this.addEventListener('overlay-closed', this._onOverlayClosed.bind(this));
-        window.addEventListener('popstate', this._onPopstate.bind(this));
+        document.body.addEventListener('overlay-created', this.__onOverlayCreated.bind(this));
+        this.addEventListener('overlay-opened', this.__onOverlayOpened.bind(this));
+        this.addEventListener('overlay-closed', this.__onOverlayClosed.bind(this));
+        window.addEventListener('popstate', this.__onPopstate.bind(this));
       }
 
-      _onOverlayCreated(event) {
+      __onOverlayCreated(event) {
         const overlay = event.detail.overlay;
         overlay.hostTarget = this.$.overlays;
       }
 
-      _onOverlayClosed(event) {
+      __onOverlayClosed(event) {
         const currentOverlay = this.currentOverlay;
-
         // Focus next opened overlay
         if (this.currentOverlay) {
           this.currentOverlay.focus();
         }
       }
 
-      _onOverlayOpened(event) {
+      __onOverlayOpened(event) {
         const overlay = event.detail.overlay;
-
         if (!overlay.noCancelOnPopState) {
           history.pushState({}, '', location.href);
         }
-
         if (overlay.unique) {
           const overlays = this.overlays;
-
           for (let i = overlays.length - 1; i >= 0; i--) {
             if (overlays[i] !== overlay && overlays[i].localName === overlay.localName
                 && overlays[i].opened) {
@@ -79,9 +73,8 @@
         }
       }
 
-      _onPopstate() {
+      __onPopstate() {
         const currentOverlay = this.currentOverlay;
-
         if (currentOverlay && !currentOverlay.noCancelOnPopState) {
           currentOverlay._setCanceled(true);
           currentOverlay.opened = false;
