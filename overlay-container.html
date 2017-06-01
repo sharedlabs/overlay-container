@@ -7,8 +7,18 @@
       #overlays {
         pointer-events: all;
       }
+
+      :host([with-backdrop]) .backdrop {
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        background: rgba(0,0,0,0.2);
+      }
     </style>
 
+    <div class="backdrop"></div>
     <div id="overlays"></div>
 
   </template>
@@ -19,41 +29,49 @@
 
       static get is() {return 'overlay-container';}
 
-      get overlays() {
-        return this.$.overlays.children;
-      }
+      static get properties() {
+        return {
 
-      get currentOverlay() {
-        const overlays = this.overlays;
-        let currentOverlay;
-        for (let i = overlays.length - 1; i >= 0; i--) {
-          if (overlays[i].opened) {
-            currentOverlay = overlays[i];
-            break;
+          withBackdrop: {
+            type: Boolean,
+            value: false,
+            reflectToAttribute: true
           }
-        }
-        return currentOverlay;
+
+        };
       }
 
-      ready() {
-        super.ready();
-        document.body.addEventListener('overlay-created', this.__onOverlayCreated.bind(this));
-        this.addEventListener('overlay-opened', this.__onOverlayOpened.bind(this));
-        this.addEventListener('overlay-closed', this.__onOverlayClosed.bind(this));
-        window.addEventListener('popstate', this.__onPopstate.bind(this));
+      constructor() {
+        super();
+        this.__beforeOpenOverlay = this.__beforeOpenOverlay.bind(this);
+        this.__onOverlayOpened = this.__onOverlayOpened.bind(this);
+        this.__onOverlayClosed = this.__onOverlayClosed.bind(this);
+        this.__onPopstate = this.__onPopstate.bind(this);
       }
 
-      __onOverlayCreated(event) {
+      connectedCallback() {
+        super.connectedCallback();
+        requestAnimationFrame(_ => {
+          this.__toggleListeners({enable: true});
+        });
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        this.__toggleListeners({enable: false});
+      }
+
+      __toggleListeners({enable}) {
+        const m = enable ? 'addEventListener' : 'removeEventListener';
+        document.body[m]('before-open-overlay', this.__beforeOpenOverlay);
+        this[m]('overlay-opened', this.__onOverlayOpened);
+        this[m]('overlay-closed', this.__onOverlayClosed);
+        window[m]('popstate', this.__onPopstate);
+      }
+
+      __beforeOpenOverlay(event) {
         const overlay = event.detail.overlay;
-        overlay.hostTarget = this.$.overlays;
-      }
-
-      __onOverlayClosed(event) {
-        const currentOverlay = this.currentOverlay;
-        // Focus next opened overlay
-        if (this.currentOverlay) {
-          this.currentOverlay.focus();
-        }
+        overlay.parentContainer = this.$.overlays;
       }
 
       __onOverlayOpened(event) {
@@ -61,23 +79,62 @@
         if (!overlay.noCancelOnPopState) {
           history.pushState({}, '', location.href);
         }
+        this.__handleUniqueOverlay(overlay);
+        this.__updateBackdrop();
+      }
+
+      __onOverlayClosed(event) {
+        const overlay = this.__getLastOverlay();
+        if (overlay) {
+          overlay.focus();
+        }
+        this.__updateBackdrop();
+      }
+
+      __onPopstate() {
+        const overlay = this.__getLastOverlay();
+        if (overlay && !overlay.noCancelOnPopState) {
+          overlay._setCanceled(true);
+          overlay.opened = false;
+        }
+      }
+
+      /**
+       * If the given overlay have the `unique` property set to true, it will
+       * close any other instance of the same overlay.
+       */
+      __handleUniqueOverlay(overlay) {
         if (overlay.unique) {
-          const overlays = this.overlays;
-          for (let i = overlays.length - 1; i >= 0; i--) {
-            if (overlays[i] !== overlay && overlays[i].localName === overlay.localName
-                && overlays[i].opened) {
-              overlays[i].opened = false;
+          const c$ = this.$.overlays.children;
+          for (let i = c$.length - 1; i >= 0; i--) {
+            if ((c$[i] !== overlay) &&
+                (c$[i].localName === overlay.localName) &&
+                (c$[i].opened)) {
+              c$[i].opened = false;
               break;
             }
           }
         }
       }
 
-      __onPopstate() {
-        const currentOverlay = this.currentOverlay;
-        if (currentOverlay && !currentOverlay.noCancelOnPopState) {
-          currentOverlay._setCanceled(true);
-          currentOverlay.opened = false;
+      __updateBackdrop() {
+        let withBackdrop = false;
+        const c$ = this.$.overlays.children;
+        for (let i = c$.length - 1; i >= 0; i--) {
+          if (c$[i].opened && c$[i].cancelOnOutsideClick) {
+            withBackdrop = true;
+            break;
+          }
+        }
+        this.withBackdrop = withBackdrop;
+      }
+
+      __getLastOverlay() {
+        const c$ = this.$.overlays.children;
+        for (let i = c$.length - 1; i >= 0; i--) {
+          if (c$[i].opened) {
+            return c$[i];
+          }
         }
       }
 
