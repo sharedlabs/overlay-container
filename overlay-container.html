@@ -71,6 +71,7 @@
       __beforeOpenOverlay(event) {
         const overlay = event.detail.overlay;
         overlay.parentContainer = this.$.overlays;
+        this.__handleCloseOthers(overlay);
       }
 
       __onOverlayOpened(event) {
@@ -78,7 +79,6 @@
         if (!overlay.noCancelOnPopState) {
           history.pushState({}, '', location.href);
         }
-        this.__handleUniqueOverlay(overlay);
         this.__updateBackdrop();
       }
 
@@ -99,16 +99,14 @@
       }
 
       /**
-       * If the given overlay have the `unique` property set to true, it will
+       * If the given overlay have the `close others` property set to true, it will
        * close any other instance of the same overlay.
        */
-      __handleUniqueOverlay(overlay) {
-        if (overlay.unique) {
+      __handleCloseOthers(overlay) {
+        if (overlay.closeOthers) {
           const c$ = this.$.overlays.children;
           for (let i = c$.length - 1; i >= 0; i--) {
-            if ((c$[i] !== overlay) &&
-                (c$[i].localName === overlay.localName) &&
-                (c$[i].opened)) {
+            if (c$[i] !== overlay && c$[i].opened) {
               c$[i].opened = false;
               break;
             }
