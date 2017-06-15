@@ -7,7 +7,6 @@
 
         opened: {
           type: Boolean,
-          value: false,
           notify: true,
           observer: '_openedChanged'
         },
@@ -85,22 +84,19 @@
     }
 
     open() {
-      this.opened = true;
-      if (!this.isConnected) {
-        this._openedChanged(true);
+      this.__dispatchOverlayEvent('before-open-overlay', {
+        node: document.body
+      });
+      // Force the overlay to be attached on the parentContainer
+      if ((!this.isConnected) ||
+          (this.parentElement !== this.parentContainer)) {
+        this.parentContainer.appendChild(this);
       }
+      this.opened = true;
     }
 
     _openedChanged(opened, old) {
       if (opened) {
-        this.__dispatchOverlayEvent('before-open-overlay', {
-          node: document.body
-        });
-        // Make sure the overlay is within the parentContainer
-        if ((!this.isConnected) ||
-            (this.parentElement !== this.parentContainer)) {
-          this.parentContainer.appendChild(this);
-        }
         this._setCanceled(false);
         this.style.display = '';
         if (!this.noAutoFocus) {
