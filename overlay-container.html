@@ -1,143 +1,160 @@
+<script>
 
-<link rel="import" href="../polymer/polymer-element.html">
+  window.OverlayMixin = subclass => class extends subclass {
 
-<dom-module id="overlay-container">
-  <template>
-    <style>
-      #overlays {
-        pointer-events: all;
-      }
+    static get properties() {
+      return {
 
-      :host([with-backdrop]) .backdrop {
-        bottom: 0;
-        left: 0;
-        position: absolute;
-        right: 0;
-        top: 0;
-      }
-    </style>
+        opened: {
+          type: Boolean,
+          notify: true,
+          observer: '_openedChanged'
+        },
 
-    <div class="backdrop"></div>
-    <div id="overlays"></div>
+        noCancelOnEscKey: {
+          type: Boolean,
+          value: false
+        },
 
-  </template>
+        noCancelOnPopState: {
+          type: Boolean,
+          value: false
+        },
 
-  <script>
+        cancelOnOutsideClick: {
+          type: Boolean,
+          value: false
+        },
 
-    class OverlayContainer extends Polymer.Element {
+        removeOnClose: {
+          type: Boolean,
+          value: false
+        },
 
-      static get is() {return 'overlay-container';}
+        closeOthers: {
+          type: Boolean,
+          value: false
+        },
 
-      static get properties() {
-        return {
+        onDetach: {
+          type: Function
+        },
 
-          withBackdrop: {
-            type: Boolean,
-            value: false,
-            reflectToAttribute: true
-          }
+        canceled: {
+          type: Boolean,
+          readOnly: true,
+          value: false
+        },
 
-        };
-      }
+        noAutoFocus: {
+          type: Boolean,
+          value: false
+        },
 
-      constructor() {
-        super();
-        this.__beforeOpenOverlay = this.__beforeOpenOverlay.bind(this);
-        this.__onOverlayOpened = this.__onOverlayOpened.bind(this);
-        this.__onOverlayClosed = this.__onOverlayClosed.bind(this);
-        this.__onPopstate = this.__onPopstate.bind(this);
-      }
-
-      connectedCallback() {
-        super.connectedCallback();
-        requestAnimationFrame(_ => {
-          this.__toggleListeners({enable: true});
-        });
-      }
-
-      disconnectedCallback() {
-        super.disconnectedCallback();
-        this.__toggleListeners({enable: false});
-      }
-
-      __toggleListeners({enable}) {
-        const m = enable ? 'addEventListener' : 'removeEventListener';
-        document.body[m]('before-open-overlay', this.__beforeOpenOverlay);
-        this[m]('overlay-opened', this.__onOverlayOpened);
-        this[m]('overlay-closed', this.__onOverlayClosed);
-        window[m]('popstate', this.__onPopstate);
-      }
-
-      __beforeOpenOverlay(event) {
-        const overlay = event.detail.overlay;
-        overlay.parentContainer = this.$.overlays;
-        this.__handleCloseOthers(overlay);
-      }
-
-      __onOverlayOpened(event) {
-        const overlay = event.detail.overlay;
-        if (!overlay.noCancelOnPopState) {
-          history.pushState({}, '', location.href);
+        parentContainer: {
+          type: Object,
+          value: document.body
         }
-        this.__updateBackdrop();
-      }
 
-      __onOverlayClosed(event) {
-        const overlay = this.__getLastOverlay();
-        if (overlay) {
-          overlay.focus();
-        }
-        this.__updateBackdrop();
-      }
-
-      __onPopstate() {
-        const overlay = this.__getLastOverlay();
-        if (overlay && !overlay.noCancelOnPopState) {
-          overlay._setCanceled(true);
-          overlay.opened = false;
-        }
-      }
-
-      /**
-       * If the given overlay have the `close others` property set to true, it will
-       * close any other instance of the same overlay.
-       */
-      __handleCloseOthers(overlay) {
-        if (overlay.closeOthers) {
-          const c$ = this.$.overlays.children;
-          for (let i = c$.length - 1; i >= 0; i--) {
-            if (c$[i] !== overlay && c$[i].opened) {
-              c$[i].opened = false;
-              break;
-            }
-          }
-        }
-      }
-
-      __updateBackdrop() {
-        let withBackdrop = false;
-        const c$ = this.$.overlays.children;
-        for (let i = c$.length - 1; i >= 0; i--) {
-          if (c$[i].opened && c$[i].cancelOnOutsideClick) {
-            withBackdrop = true;
-            break;
-          }
-        }
-        this.withBackdrop = withBackdrop;
-      }
-
-      __getLastOverlay() {
-        const c$ = this.$.overlays.children;
-        for (let i = c$.length - 1; i >= 0; i--) {
-          if (c$[i].opened) {
-            return c$[i];
-          }
-        }
-      }
-
+      };
     }
 
-    customElements.define(OverlayContainer.is, OverlayContainer);
+    constructor() {
+      super();
+      this.__onOverlayKeydown = this.__onOverlayKeydown.bind(this);
+      this.__onDocumentMousedown = this.__onDocumentMousedown.bind(this);
+    }
 
-  </script>
-</dom-module>
+    connectedCallback() {
+      super.connectedCallback();
+      this._ensureAttribute('tabindex', -1);
+      requestAnimationFrame(_ => {
+        this.__toggleOverlayListeners({enable: true});
+      });
+    }
+
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this.__dispatchOverlayEvent('overlay-detached', {node: this.parentContainer});
+      this.__dispatchOverlayEvent('overlay-detached');
+      this.__toggleOverlayListeners({enable: false});
+      if (typeof this.onDetach === 'function') {
+        this.onDetach();
+      }
+    }
+
+    open() {
+      this.__dispatchOverlayEvent('before-open-overlay', {
+        node: document.body
+      });
+      // Force the overlay to be attached on the parentContainer
+      if ((!this.isConnected) ||
+          (this.parentElement !== this.parentContainer)) {
+        this.parentContainer.appendChild(this);
+      }
+      this.opened = true;
+    }
+
+    _openedChanged(opened, old) {
+      if (opened) {
+        this._setCanceled(false);
+        this.style.display = '';
+        if (!this.noAutoFocus) {
+          this.focus();
+        }
+        this.__dispatchOverlayEvent('overlay-opened');
+      } else {
+        this.style.display = 'none';
+      }
+      if (old) {
+        this.__dispatchOverlayEvent('overlay-closed');
+      }
+      if (!opened && this.removeOnClose) {
+        this.remove();
+      }
+    }
+
+    __toggleOverlayListeners({enable}) {
+      const m = enable ? 'addEventListener' : 'removeEventListener';
+      this[m]('keydown', this.__onOverlayKeydown);
+      document[m]('mousedown', this.__onDocumentMousedown);
+    }
+
+    __onOverlayKeydown(event) {
+      const escKey = 27;
+      if (!this.noCancelOnEscKey && event.keyCode === escKey) {
+        this._setCanceled(true);
+        this.opened = false;
+      }
+    }
+
+    __dispatchOverlayEvent(eventName, {node = this, cancelable = false} = {}) {
+      node.dispatchEvent(new CustomEvent(eventName, {
+        bubbles: true,
+        composed: true,
+        cancelable,
+        detail: {
+          overlay: this
+        }
+      }));
+    }
+
+    __onDocumentMousedown(event) {
+      if (!this.cancelOnOutsideClick) {
+        return;
+      }
+      const path = event.composedPath();
+      let permitted;
+      for (let i = 0; i < path.length; i++) {
+        if (path[i] === this) {
+          permitted = true;
+          break;
+        }
+      }
+      if (!permitted) {
+        this.opened = false;
+      }
+    }
+  };
+
+</script>
