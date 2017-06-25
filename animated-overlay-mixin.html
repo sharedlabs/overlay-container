@@ -60,7 +60,6 @@
         this.__animation = this.animate(config.keyframes, config.options);
         this.__animation.onfinish = _ => {
           this.__afterAnimate();
-          this.focus();
           this.dispatchEvent(new CustomEvent('overlay-open-animation-finish', {
             bubbles: true,
             composed: true
