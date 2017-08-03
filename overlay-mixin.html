@@ -62,7 +62,7 @@
     constructor() {
       super();
       this.__onOverlayKeydown = this.__onOverlayKeydown.bind(this);
-      this.__onDocumentMousedown = this.__onDocumentMousedown.bind(this);
+      this._handleCancelOnOutsideClick = this._handleCancelOnOutsideClick.bind(this);
     }
 
     connectedCallback() {
@@ -118,10 +118,27 @@
       }
     }
 
+    _handleCancelOnOutsideClick(event) {
+      if (!this.cancelOnOutsideClick) {
+        return;
+      }
+      const path = event.composedPath();
+      let permitted;
+      for (let i = 0; i < path.length; i++) {
+        if (path[i] === this) {
+          permitted = true;
+          break;
+        }
+      }
+      if (!permitted) {
+        this.opened = false;
+      }
+    }
+
     __toggleOverlayListeners({enable}) {
       const m = enable ? 'addEventListener' : 'removeEventListener';
       this[m]('keydown', this.__onOverlayKeydown);
-      document[m]('mousedown', this.__onDocumentMousedown);
+      document[m]('mousedown', this._handleCancelOnOutsideClick);
     }
 
     __onOverlayKeydown(event) {
@@ -143,22 +160,6 @@
       }));
     }
 
-    __onDocumentMousedown(event) {
-      if (!this.cancelOnOutsideClick) {
-        return;
-      }
-      const path = event.composedPath();
-      let permitted;
-      for (let i = 0; i < path.length; i++) {
-        if (path[i] === this) {
-          permitted = true;
-          break;
-        }
-      }
-      if (!permitted) {
-        this.opened = false;
-      }
-    }
   };
 
 </script>
