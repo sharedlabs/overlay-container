@@ -75,6 +75,10 @@
 
     disconnectedCallback() {
       super.disconnectedCallback();
+      if (this.opened) {
+        this.opened = false;
+        this.__dispatchOverlayEvent('overlay-closed', {node: this.parentContainer});
+      }
       this.__dispatchOverlayEvent('overlay-detached', {node: this.parentContainer});
       this.__dispatchOverlayEvent('overlay-detached');
       this.__toggleOverlayListeners({enable: false});
