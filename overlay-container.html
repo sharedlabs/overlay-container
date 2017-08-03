@@ -84,7 +84,7 @@
 
       __onOverlayClosed(event) {
         const overlay = this.__getLastOverlay();
-        if (overlay) {
+        if (overlay && !this.__isOverlayOrDescendantFocused(overlay)) {
           overlay.focus();
         }
         this.__updateBackdrop();
@@ -133,6 +133,27 @@
             return c$[i];
           }
         }
+      }
+
+      __isOverlayOrDescendantFocused(overlay) {
+        const activeElement = this.__getDeepActiveElement();
+        if (activeElement) {
+          let node = activeElement;
+          while(node && node !== this) {
+            if (node === overlay) {
+              return true;
+            }
+            node = node.parentNode || node.host;
+          }
+        }
+        return false;
+      }
+
+      __getDeepActiveElement() {
+        var activeElement = document.activeElement;
+        while (activeElement && activeElement.shadowRoot && activeElement.shadowRoot.activeElement)
+          activeElement = activeElement.shadowRoot.activeElement;
+        return activeElement;
       }
 
     }
