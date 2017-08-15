@@ -76,6 +76,7 @@
 
       __onOverlayOpened(event) {
         const overlay = event.detail.overlay;
+        this.__handleCloseOthers(overlay);
         if (!overlay.noCancelOnPopState) {
           history.pushState({}, '', location.href);
         }
@@ -99,8 +100,8 @@
       }
 
       /**
-       * If the given overlay have the `close others` property set to true, it will
-       * close any other instance of the same overlay.
+       * If the given overlay have the `closeOthers` attribute set to true,
+       * then all overlays will be closed.
        */
       __handleCloseOthers(overlay) {
         if (overlay.closeOthers) {

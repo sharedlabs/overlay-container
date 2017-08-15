@@ -88,19 +88,13 @@
     }
 
     open() {
-      this.__dispatchOverlayEvent('before-open-overlay', {
-        node: document.body
-      });
-      // Force the overlay to be attached on the parentContainer
-      if ((!this.isConnected) ||
-          (this.parentElement !== this.parentContainer)) {
-        this.parentContainer.appendChild(this);
-      }
       this.opened = true;
+      this._openedChanged(this.opened);
     }
 
     _openedChanged(opened, old) {
       if (opened) {
+        this.__beforeOpen();
         this._setCanceled(false);
         this.style.display = '';
         if (!this.noAutoFocus) {
@@ -115,6 +109,17 @@
       }
       if (!opened && this.removeOnClose) {
         this.remove();
+      }
+    }
+
+    __beforeOpen() {
+      this.__dispatchOverlayEvent('before-open-overlay', {
+        node: document.body
+      });
+      if ((!this.isConnected) ||
+          (this.parentElement !== this.parentContainer)) {
+        // Attach the overlay to the parentContainer
+        this.parentContainer.appendChild(this);
       }
     }
 
