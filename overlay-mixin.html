@@ -67,9 +67,7 @@
 
     connectedCallback() {
       super.connectedCallback();
-      requestAnimationFrame(_ => {
-        this._ensureAttribute('tabindex', -1);
-      });
+      this._ensureAttribute('tabindex', -1);
     }
 
     disconnectedCallback() {
