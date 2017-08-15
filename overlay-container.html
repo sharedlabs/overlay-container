@@ -71,7 +71,6 @@
       __beforeOpenOverlay(event) {
         const overlay = event.detail.overlay;
         overlay.parentContainer = this.$.overlays;
-        this.__handleCloseOthers(overlay);
       }
 
       __onOverlayOpened(event) {
