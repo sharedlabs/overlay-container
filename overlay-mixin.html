@@ -67,9 +67,8 @@
 
     connectedCallback() {
       super.connectedCallback();
-      this._ensureAttribute('tabindex', -1);
       requestAnimationFrame(_ => {
-        this.__toggleOverlayListeners({enable: true});
+        this._ensureAttribute('tabindex', -1);
       });
     }
 
@@ -81,20 +80,29 @@
       }
       this.__dispatchOverlayEvent('overlay-detached', {node: this.parentContainer});
       this.__dispatchOverlayEvent('overlay-detached');
-      this.__toggleOverlayListeners({enable: false});
       if (typeof this.onDetach === 'function') {
         this.onDetach();
       }
     }
 
+    /**
+     * Polymer call observers once the element is attached.
+     * If the overlay is created programmatically, setting the opened property
+     * to true won't trigger the '_openedChanged' method. Instead use this
+     * method.
+     */
     open() {
       this.opened = true;
-      this._openedChanged(this.opened);
+      if (!this.isConnected) {
+        // This will attach the the overlay to the DOM and call observers.
+        this.__beforeOpen();
+      }
     }
 
     _openedChanged(opened, old) {
       if (opened) {
         this.__beforeOpen();
+        this.__toggleOverlayListeners({enable: true});
         this._setCanceled(false);
         this.style.display = '';
         if (!this.noAutoFocus) {
@@ -102,6 +110,7 @@
         }
         this.__dispatchOverlayEvent('overlay-opened');
       } else {
+        this.__toggleOverlayListeners({enable: false});
         this.style.display = 'none';
       }
       if (old) {
