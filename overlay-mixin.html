@@ -66,8 +66,8 @@
     }
 
     connectedCallback() {
-      super.connectedCallback();
       this._ensureAttribute('tabindex', -1);
+      super.connectedCallback();
     }
 
     disconnectedCallback() {
