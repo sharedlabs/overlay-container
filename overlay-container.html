@@ -58,9 +58,7 @@
 
       connectedCallback() {
         super.connectedCallback();
-        requestAnimationFrame(_ => {
-          this.__toggleListeners({enable: true});
-        });
+        this.__toggleListeners({enable: true});
       }
 
       disconnectedCallback() {
