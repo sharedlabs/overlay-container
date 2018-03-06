@@ -18,10 +18,17 @@
         pointer-events: all;
       }
 
-      :host([with-backdrop]) .backdrop {
-        pointer-events: all;
-        width: 100%;
+      :host([backdrop]) .backdrop {
+        background: rgba(0,0,0,0.2);
         height: 100%;
+        pointer-events: all;
+        position: absolute;
+        width: 100%;
+        z-index: 0;
+      }
+
+      :host([backdrop="transparent"]) .backdrop {
+        background: transparent;
       }
     </style>
 
@@ -29,7 +36,6 @@
     <div id="overlays"></div>
 
   </template>
-
   <script>
 
     class OverlayContainer extends Polymer.Element {
@@ -39,11 +45,11 @@
       static get properties() {
         return {
 
-          withBackdrop: {
-            type: Boolean,
-            value: false,
+          backdrop: {
+            type: String,
+            value: null,
             reflectToAttribute: true
-          }
+          },
 
         };
       }
@@ -121,15 +127,18 @@
       }
 
       __updateBackdrop() {
-        let withBackdrop = false;
+        var withBackdrop = false;
+        var cancelOnOutsideClick = false;
         const c$ = this.$.overlays.children;
         for (let i = c$.length - 1; i >= 0; i--) {
-          if (c$[i].opened && c$[i].cancelOnOutsideClick) {
-            withBackdrop = true;
-            break;
+          if (c$[i].opened) {
+            withBackdrop = c$[i].withBackdrop || withBackdrop;
+            cancelOnOutsideClick = c$[i].cancelOnOutsideClick || cancelOnOutsideClick;
           }
         }
-        this.withBackdrop = withBackdrop;
+        this.backdrop = withBackdrop ?
+            true :
+            cancelOnOutsideClick ? 'transparent' : false;
       }
 
       __getLastOverlay() {
