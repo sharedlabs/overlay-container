@@ -16,7 +16,7 @@
           value: false
         },
 
-        noCancelOnPopState: {
+        cancelOnPopState: {
           type: Boolean,
           value: false
         },
@@ -63,7 +63,6 @@
       super();
       this.__movingToContainer = false;
       this.__onOverlayKeydown = this.__onOverlayKeydown.bind(this);
-      this._handleCancelOnOutsideClick = this._handleCancelOnOutsideClick.bind(this);
     }
 
     connectedCallback() {
@@ -81,10 +80,10 @@
       }      
       if (this.opened) {
         this.opened = false;
-        this.__dispatchOverlayEvent('overlay-closed', {node: this.parentContainer});
+        this.__dispatchEvent('overlay-closed', {node: this.parentContainer});
       }
-      this.__dispatchOverlayEvent('overlay-detached', {node: this.parentContainer});
-      this.__dispatchOverlayEvent('overlay-detached');
+      this.__dispatchEvent('overlay-detached', {node: this.parentContainer});
+      this.__dispatchEvent('overlay-detached');
       if (typeof this.onDetach === 'function') {
         this.onDetach();
       }
@@ -113,13 +112,13 @@
         if (!this.noAutoFocus) {
           this.focus();
         }
-        this.__dispatchOverlayEvent('overlay-opened');
+        this.__dispatchEvent('overlay-opened');
       } else {
         this.__toggleOverlayListeners({enable: false});
         this.style.display = 'none';
       }
       if (old) {
-        this.__dispatchOverlayEvent('overlay-closed');
+        this.__dispatchEvent('overlay-closed');
       }
       if (!opened && this.removeOnClose) {
         this.remove();
@@ -127,7 +126,7 @@
     }
 
     __beforeOpen() {
-      this.__dispatchOverlayEvent('before-open-overlay', {
+      this.__dispatchEvent('before-open-overlay', {
         node: document.body
       });
       if ((!this.isConnected) ||
@@ -144,31 +143,12 @@
     __attachToParentContainer() {
       try {
         this.parentContainer.appendChild(this);
-      } catch(e) {
-      }
-    }
-
-    _handleCancelOnOutsideClick(event) {
-      if (!this.cancelOnOutsideClick) {
-        return;
-      }
-      const path = event.composedPath();
-      let permitted;
-      for (let i = 0; i < path.length; i++) {
-        if (path[i] === this) {
-          permitted = true;
-          break;
-        }
-      }
-      if (!permitted) {
-        this.opened = false;
-      }
+      } catch(e) {}
     }
 
     __toggleOverlayListeners({enable}) {
       const m = enable ? 'addEventListener' : 'removeEventListener';
       this[m]('keydown', this.__onOverlayKeydown);
-      document[m]('mousedown', this._handleCancelOnOutsideClick);
     }
 
     __onOverlayKeydown(event) {
@@ -179,7 +159,7 @@
       }
     }
 
-    __dispatchOverlayEvent(eventName, {node = this, cancelable = false} = {}) {
+    __dispatchEvent(eventName, {node=this, cancelable=false} = {}) {
       node.dispatchEvent(new CustomEvent(eventName, {
         bubbles: true,
         composed: true,

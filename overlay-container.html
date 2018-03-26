@@ -19,26 +19,20 @@
       }
 
       .backdrop {
-        opacity: 0;
-        transition: all 0.2s ease-in
-      }
-      
-      :host([backdrop]) .backdrop {
         background: rgba(0,0,0,0.2);
         height: 100%;
-        opacity: 1;
+        opacity: 0;
         pointer-events: all;
         position: absolute;
+        transition: all 0.2s ease-in;
         width: 100%;
-        z-index: 0;
       }
 
-      :host([backdrop="transparent"]) .backdrop {
-        background: transparent;
-      }
+      .backdrop[transparent] {
+        background: rgba(0,0,0,0);
+      }      
     </style>
 
-    <div class="backdrop"></div>
     <div id="overlays"></div>
 
   </template>
@@ -48,24 +42,13 @@
 
       static get is() {return 'overlay-container';}
 
-      static get properties() {
-        return {
-
-          backdrop: {
-            type: String,
-            value: null,
-            reflectToAttribute: true
-          },
-
-        };
-      }
-
       constructor() {
         super();
         this.__beforeOpenOverlay = this.__beforeOpenOverlay.bind(this);
         this.__onOverlayOpened = this.__onOverlayOpened.bind(this);
         this.__onOverlayClosed = this.__onOverlayClosed.bind(this);
         this.__onPopstate = this.__onPopstate.bind(this);
+        this.__onBackdropMousedown = this.__onBackdropMousedown.bind(this);
       }
 
       connectedCallback() {
@@ -86,31 +69,32 @@
         window[m]('popstate', this.__onPopstate);
       }
 
-      __beforeOpenOverlay(event) {
-        const overlay = event.detail.overlay;
+      __beforeOpenOverlay(evt) {
+        const overlay = evt.detail.overlay;
         overlay.parentContainer = this.$.overlays;
       }
 
-      __onOverlayOpened(event) {
-        const overlay = event.detail.overlay;
+      __onOverlayOpened(evt) {
+        const overlay = evt.detail.overlay;
         this.__handleCloseOthers(overlay);
-        if (!overlay.noCancelOnPopState) {
+        if (overlay.cancelOnPopState) {
           history.pushState({}, '', location.href);
         }
-        this.__updateBackdrop();
+        this.__updateBackdrop(overlay);
       }
 
-      __onOverlayClosed(event) {
-        const overlay = this.__getLastOverlay();
-        if (overlay && !this.__isOverlayOrDescendantFocused(overlay)) {
-          overlay.focus();
+      __onOverlayClosed(evt) {
+        const overlay = evt.composedPath()[0];
+        const lastOverlay = this.__getLastOverlay();
+        if (lastOverlay && !this.__isOverlayOrDescendantFocused(lastOverlay)) {
+          lastOverlay.focus();
         }
-        this.__updateBackdrop();
+        this.__updateBackdrop(overlay);
       }
 
       __onPopstate() {
         const overlay = this.__getLastOverlay();
-        if (overlay && !overlay.noCancelOnPopState) {
+        if (overlay && overlay.cancelOnPopState) {
           overlay._setCanceled(true);
           overlay.opened = false;
         }
@@ -126,25 +110,46 @@
           for (let i = c$.length - 1; i >= 0; i--) {
             if (c$[i] !== overlay && c$[i].opened) {
               c$[i].opened = false;
-              break;
             }
           }
         }
       }
 
-      __updateBackdrop() {
-        var withBackdrop = false;
-        var cancelOnOutsideClick = false;
-        const c$ = this.$.overlays.children;
-        for (let i = c$.length - 1; i >= 0; i--) {
-          if (c$[i].opened) {
-            withBackdrop = c$[i].withBackdrop || withBackdrop;
-            cancelOnOutsideClick = c$[i].cancelOnOutsideClick || cancelOnOutsideClick;
+      __updateBackdrop(overlay) {
+        const {withBackdrop, cancelOnOutsideClick, opened} = overlay;
+        if (opened) {
+          if (withBackdrop || cancelOnOutsideClick) {
+            const el = document.createElement('div');
+            el.classList.add('backdrop');
+            if (!withBackdrop) {
+              el.setAttribute('transparent', '');
+            }
+            overlay.__backdropEl = el;
+            this.$.overlays.insertBefore(el, overlay);
+            el.offsetHeight; /* force repaint */
+            el.style.opacity = 1;
+            if (cancelOnOutsideClick) {
+              el.addEventListener('mousedown', this.__onBackdropMousedown);
+            }
+          }
+        } else {
+          if (overlay.__backdropEl) {
+            overlay.__backdropEl.removeEventListener(
+                'mousedown', this.__onBackdropMousedown);
+            overlay.__backdropEl.remove();
+            overlay.__backdropEl = null;
           }
         }
-        this.backdrop = withBackdrop ?
-            true :
-            cancelOnOutsideClick ? 'transparent' : false;
+      }
+
+      __onBackdropMousedown(evt) {
+        const target = evt.composedPath()[0];
+        const c$ = this.$.overlays.children;
+        for (let i = c$.length - 1; i >= 0; i--) {
+          if (c$[i] && c$[i].__backdropEl === target) {
+            c$[i].opened = false;
+          }
+        }
       }
 
       __getLastOverlay() {
@@ -172,8 +177,9 @@
 
       __getDeepActiveElement() {
         var activeElement = document.activeElement;
-        while (activeElement && activeElement.shadowRoot && activeElement.shadowRoot.activeElement)
+        while (activeElement && activeElement.shadowRoot && activeElement.shadowRoot.activeElement) {
           activeElement = activeElement.shadowRoot.activeElement;
+        }
         return activeElement;
       }
 
