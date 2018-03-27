@@ -108,7 +108,7 @@
         if (overlay.closeOthers) {
           const c$ = this.$.overlays.children;
           for (let i = c$.length - 1; i >= 0; i--) {
-            if (c$[i] !== overlay && c$[i].opened) {
+            if (c$[i] && c$[i] !== overlay && c$[i].opened) {
               c$[i].opened = false;
             }
           }
