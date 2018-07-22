@@ -6,10 +6,9 @@
 
     <title>overlay-container demo</title>
 
-    <script src="../../webcomponentsjs/webcomponents-loader.js"></script>
-    <link rel="import" href="../overlay-container.html">
-    <link rel="import" href="sample-overlay.html">
-    <link rel="import" href="sample-animated-overlay.html">
+    <script type="module" src="../overlay-container.js"></script>
+    <script type="module" src="./sample-overlay.js"></script>
+    <script type="module" src="./sample-animated-overlay.js"></script>
 
     <style>
     </style>
@@ -19,10 +18,8 @@
     <overlay-container></overlay-container>
     <button onclick="openOverlay()">Open overlay</button>
     <button onclick="openAnimatedOverlay()">Open animated overlay</button>
-    <sample-overlay opened style="left: 10px; top: 10px;"></sample-overlay>
 
     <script>
-
       function openOverlay() {
         window.overlay = document.createElement('sample-overlay');
         overlay.style.left = Math.floor(Math.random() * 500) + 'px';
@@ -34,7 +31,6 @@
         window.overlay = document.createElement('sample-animated-overlay');
         overlay.open();
       }
-
     </script>
 
   </body>

@@ -1,0 +1,14 @@
+{
+  "name": "@polymer/overlay-container",
+  "version": "2.7.2",
+  "main": "overlay-container.js",
+  "author": "Pedro Garcia <pdgago@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@polymer/polymer": "^3.0.0"
+  },
+  "devDependencies": {
+    "@webcomponents/webcomponentsjs": "^2.0.0",
+    "wct-browser-legacy": "^1.0.0"
+  }
+}

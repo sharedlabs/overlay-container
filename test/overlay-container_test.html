@@ -4,27 +4,32 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <title>overlay-container test</title>
+    <title>overlay-mixin test</title>
 
-    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-    <script src="../../web-component-tester/browser.js"></script>
+    <script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+    <script src="../node_modules/wct-browser-legacy/browser.js"></script>
 
-    <link rel="import" href="../overlay-container.html">
+    <script type="module" src="../demo/sample-overlay.js"></script>
   </head>
   <body>
-    <test-fixture id="basic">
+
+    <test-fixture id="BasicTestFixture">
       <template>
-        <overlay-container></overlay-container>
+        <sample-overlay></sample-overlay>
       </template>
     </test-fixture>
 
     <script>
-      suite('overlay-container', function() {
-        test('instantiating the element works', function() {
-          var element = fixture('basic');
-          assert.equal(element.is, 'overlay-container');
+      suite('overlay-mixin', function() {
+
+        test('instantiating the element with default properties works', function() {
+          var element = fixture('BasicTestFixture');
+          assert.equal(element.localName, 'sample-overlay');
         });
+
       });
     </script>
+
+
   </body>
 </html>
