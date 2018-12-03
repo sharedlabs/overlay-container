@@ -86,7 +86,9 @@
       __onOverlayClosed(evt) {
         const overlay = evt.composedPath()[0];
         const lastOverlay = this.__getLastOverlay();
-        if (lastOverlay && !this.__isOverlayOrDescendantFocused(lastOverlay)) {
+        if ((lastOverlay) &&
+            (!lastOverlay.noAutoFocus) &&
+            (!this.__isOverlayOrDescendantFocused(lastOverlay))) {
           lastOverlay.focus();
         }
         this.__updateBackdrop(overlay);
